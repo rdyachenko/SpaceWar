@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Space War</title>
+</head>
+
+<link rel="stylesheet" href="SpaceWarStyleSheet.css">
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="SpaceWarScripts.js"></script>
+
+<body>
+	<table ng-app="myApp" ng-controller="myCtrl">
+		<tr>
+			<td>
+				<button id="start" ng-click="startStopClick()">Start</button>
+			</td>
+			<td>
+				<label id="info" />
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label>Speed:</label>
+				<input id="spinner" type="number" value="10" />
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label>Enemy Col:</label>
+				<input id="enemyCol" type="number" value="10" />
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label>Enemy Row:</label>
+				<input id="ememyRow" type="number" value="10" />
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label>Ship speed:</label>
+				<input id="shipSpeed" type="number" value="5"/>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<canvas id="field" class="canvasField" width="1024" height="768" />
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

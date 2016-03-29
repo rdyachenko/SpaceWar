@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Components>
+ <ProjectUrl>http://subversion/svn/payments/ServiceFrameworks/Framework.BusinessOperations/trunk@175912</ProjectUrl>
+ <Artefact TypeValue="e" Extension=".dll" Name="AntiXssLibrary" Revision="55963" Version="4.0.0.0" IsResolved="True" Dir="AntiXssLibrary/4.0.0.0/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="BetAndWin.Security" Revision="77414" Version="0.0.0.197214" IsResolved="True" Dir="BetAndWin.Security/0.0.0.197214/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Caching" Revision="77719" Version="0.0.0.173648" IsResolved="True" Dir="Framework.Caching/0.0.0.173648/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Caching.TableModifications" Revision="74339" Version="0.0.0.144272" IsResolved="True" Dir="Framework.Caching.TableModifications/0.0.0.144272/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.CommunicationFoundation" Revision="77284" Version="0.0.0.170800" IsResolved="True" Dir="Framework.CommunicationFoundation/0.0.0.170800/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.CommunicationFoundation.Testing" Revision="71685" Version="0.0.0.125671" IsResolved="True" Dir="Framework.CommunicationFoundation.Testing/0.0.0.125671/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Configuration" Revision="73735" Version="0.0.0.139390" IsResolved="True" Dir="Framework.Configuration/0.0.0.139390/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Core" Revision="77104" Version="0.0.0.169419" IsResolved="True" Dir="Framework.Core/0.0.0.169419/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Credentials" Revision="71685" Version="0.0.0.125671" IsResolved="True" Dir="Framework.Credentials/0.0.0.125671/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Cryptography" Revision="77282" Version="0.0.0.170790" IsResolved="True" Dir="Framework.Cryptography/0.0.0.170790/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.DataAccess" Revision="75834" Version="0.0.0.156294" IsResolved="True" Dir="Framework.DataAccess/0.0.0.156294/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.DataAccess.TransactionHandling" Revision="71685" Version="0.0.0.125671" IsResolved="True" Dir="Framework.DataAccess.TransactionHandling/0.0.0.125671/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.DataAccess.TransactionHandling.ESTransactionHandler" Revision="71685" Version="0.0.0.125671" IsResolved="True" Dir="Framework.DataAccess.TransactionHandling.ESTransactionHandler/0.0.0.125671/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Encoding" Revision="71685" Version="0.0.0.125671" IsResolved="True" Dir="Framework.Encoding/0.0.0.125671/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Extensions" Revision="76443" Version="0.0.0.162011" IsResolved="True" Dir="Framework.Extensions/0.0.0.162011/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Monitoring" Revision="75061" Version="0.0.0.150678" IsResolved="True" Dir="Framework.Monitoring/0.0.0.150678/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.ObjectHandling" Revision="76312" Version="0.0.0.160589" IsResolved="True" Dir="Framework.ObjectHandling/0.0.0.160589/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.ObjectLocation" Revision="71685" Version="0.0.0.125671" IsResolved="True" Dir="Framework.ObjectLocation/0.0.0.125671/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Originator" Revision="77064" Version="0.0.0.168978" IsResolved="True" Dir="Framework.Originator/0.0.0.168978/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Serialization" Revision="72549" Version="0.0.0.131402" IsResolved="True" Dir="Framework.Serialization/0.0.0.131402/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Transactions" Revision="71685" Version="0.0.0.125671" IsResolved="True" Dir="Framework.Transactions/0.0.0.125671/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Web.Services" Revision="77117" Version="0.0.0.169670" IsResolved="True" Dir="Framework.Web.Services/0.0.0.169670/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="Framework.Web.UI" Revision="77699" Version="0.0.0.173595" IsResolved="True" Dir="Framework.Web.UI/0.0.0.173595/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="log4net" Revision="977" Version="2.0.0.0" IsResolved="True" Dir="log4net/2.0.0.0/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="nunit.framework" Revision="61255" Version="2.5.10.11092" IsResolved="True" Dir="nunit.framework/2.5.10.11092/" />
+ <Artefact TypeValue="e" Extension=".dll" Name="TypeMock" Revision="70211" Version="7.4.1.0" IsResolved="True" Dir="TypeMock/7.4.1.0/" />
+</Components>
