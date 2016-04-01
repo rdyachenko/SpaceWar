@@ -1,33 +1,5 @@
 ﻿//window.addEventListener("load", init, true);
 
-function drawEnemy(context, enemy) {
-		context.beginPath();
-		context.rect(enemy.x, enemy.y, enemy.s, enemy.s);
-		context.closePath();
-		context.fill();
-}
-
-function drawShip(context, ship) {
-		context.beginPath();
-		context.rect(ship.x, ship.y, ship.s, ship.s);
-		context.closePath();
-		context.fill();
-}
-
-function drawPiston(context, piston) {
-		context.beginPath();
-		context.rect(piston.x, piston.y, 3, 3);
-		context.closePath();
-		context.fill();
-}
-
-function drawText(context, text, color, size) {
-	context.font = size + "px Arial";
-	context.fillStyle = color;
-	context.textAlign = "center";
-	context.fillText(text, canvas.width/2, canvas.height/2);
-}
-
 var arrPiston = [];
 var arrEnemy = [];
 var arrKeyCodes = [];
@@ -40,16 +12,54 @@ var context;
 var start = false;
 var animation = false;
 
+var resolution = { x: 1024, y: 768 };
+
+var dX = 1;
+var dY = 1;
+var dS = 1;
+
+function drawEnemy(context, enemy) {
+		context.beginPath();
+		context.rect(enemy.x * dX, enemy.y * dY, enemy.s * dS, enemy.s * dS);
+		context.closePath();
+		context.fill();
+}
+
+function drawShip(context, ship) {
+		context.beginPath();
+		context.rect(ship.x * dX, ship.y * dY, ship.s * dS, ship.s * dS);
+		context.closePath();
+		context.fill();
+}
+
+function drawPiston(context, piston) {
+		context.beginPath();
+		context.rect(piston.x * dX, piston.y * dY, 3 * dS, 3 * dS);
+		context.closePath();
+		context.fill();
+}
+
+function drawText(context, text, color, size) {
+	context.font = size + "px Arial";
+	context.fillStyle = color;
+	context.textAlign = "center";
+	context.fillText(text, resolution.x * dY / 2, resolution.y *dY/ 2);
+}
+
 function init() {
 	var enemyCol = document.getElementById('enemyCol').value;
 	var enemyRow = document.getElementById('ememyRow').value;
 	var shipSpeed = document.getElementById('shipSpeed').value;
+
+	dX = canvas.width / (resolution.x + 1);
+	dY = canvas.height / (resolution.y + 1);
+	dS = Math.min(dX, dY);
 	
-	enemyRect = {x: canvas.clientLeft + 1, y: canvas.clientTop + 70, w:canvas.width - 3, h: enemyRow * 30};
+	enemyRect = { x: 0, y: 0, w: 0, h: 0 };
 
 	ship = {
-		x: canvas.width / 2,
-		y: canvas.height - 20,
+		x: resolution.x / 2,
+		y: resolution.y - 20,
 		s: 20,
 		speed: shipSpeed
 	}
@@ -95,7 +105,7 @@ function render() {
 	}
 	
 	/*context.beginPath();
-	context.rect(enemyRect.x, enemyRect.y, enemyRect.w, enemyRect.h);
+	context.rect(enemyRect.x * dX, enemyRect.y * dY, enemyRect.w * dX, enemyRect.h * dY);
 	context.closePath();*/
 
 	context.stroke();
@@ -132,12 +142,12 @@ function animate(canvas, context, startTime) {
 
 	var linearSpeed = 500;
 	// pixels / second
-	var dY = linearSpeed * time / 1000;
+	var speedY = linearSpeed * time / 1000;
 	
 	for (var i = 0; i < arrPiston.length; i++) {
 		var piston = arrPiston[i];
 		if (piston.y > 0) {
-			piston.y -= dY;
+			piston.y -= speedY;
 
 			var enemy;
 			if (InEnemy(piston, function (e) { index = e; })) {
@@ -169,11 +179,11 @@ function animate(canvas, context, startTime) {
 				}
 				break;
 			case 37://left
-				if (ship.x > 0)
+				if (ship.x >= 0)
 					ship.x -= parseInt(ship.speed);
 				break;
 			case 39: //right
-				if (ship.x + ship.s < canvas.width)
+				if (ship.x + ship.s <= resolution.x)
 					ship.x += parseInt(ship.speed);
 				break;
 			default:
@@ -184,10 +194,16 @@ function animate(canvas, context, startTime) {
 	var speed = document.getElementById('spinner').value;
 
 	if (arrEnemy.length > 0){
-		for (var i = 0; i < arrEnemy.length; i++)
-			arrEnemy[i].y += dY / 100 * speed;
-		enemyRect.y += dY / 100 * speed;
+		for (var i = 0; i < arrEnemy.length; i++) {
+			arrEnemy[i].y += speedY / 100 * speed;
+			arrEnemy[i].x += arrEnemy[i].dx;
+			if (arrEnemy[i].x < arrEnemy[i].minX || arrEnemy[i].x + arrEnemy[i].s > arrEnemy[i].maxX)
+				arrEnemy[i].dx *= -1;
+		}
+		enemyRect.y += speedY / 100 * speed;
 	}
+
+	calcEnemyRect();
 
 	render();
 
@@ -220,40 +236,73 @@ function InEnemy(piston, enemyOut) {
 	return false;
 }
 
+function calcEnemyRect() {
+	if (arrEnemy.length > 0) {
+		var minX = arrEnemy[0].x;
+		var maxX = arrEnemy[0].x;
+		var minY = arrEnemy[0].y;
+		var maxY = arrEnemy[0].y;
+
+		for (var i = 1; i < arrEnemy.length; i++) {
+			var enemy = arrEnemy[i];
+			if (minX > enemy.x)
+				minX = enemy.x;
+			if (minY > enemy.y)
+				minY = enemy.y;
+			if (maxX < enemy.x)
+				maxX = enemy.x;
+			if (maxY < enemy.y)
+				maxY = enemy.y;
+		}
+		enemyRect.x = minX;
+		enemyRect.y = minY;
+		enemyRect.w = maxX - minX + arrEnemy[0].s;
+		enemyRect.h = maxY - minY + arrEnemy[0].s;
+	}
+}
+
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function ($scope, $http) {
 
-	canvas = document.getElementById('field');
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight - 200;
+		canvas = document.getElementById('field');
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight - 200;
 
-	context = canvas.getContext('2d');
+		context = canvas.getContext('2d');
 
-	$scope.startStopClick = function() {
-		var btnStart = document.getElementById('start');
+		$scope.startStopClick = function() {
+			var btnStart = document.getElementById('start');
 
-		$http.get("/api/SpaceWar/EnemyPosition")
-		.success(function (response) {
+			$http.get("/api/SpaceWar/EnemyPosition")
+			.success(function (response) {
 
-			if (arrEnemy.length == 0)
-				arrEnemy = response.slice();
+				if (arrEnemy.length == 0)
+					arrEnemy = response.slice();
+
+				calcEnemyRect();
+
+				for (var i = 0; i < arrEnemy.length; i++) {
+					var enemy = arrEnemy[i];
+					enemy.maxX = resolution.x - enemyRect.w + enemy.x;
+					enemy.minX = enemy.x - enemyRect.x;
+				}
+
+				if (start) {
+					btnStart.textContent = "Start";
+					start = false;
+					animation = false;
+					init();
+				}
+				else {
+					btnStart.textContent = "Stop";
+					start = true;
+					animation = true;
+					btnStart.blur();
+					init();
+					var startTime = (new Date()).getTime();
+					animate(canvas, context, startTime);
+				}
 			
-		});
-
-		if (start) {
-			btnStart.textContent = "Start";
-			start = false;
-			animation = false;
-			init();
+			});
 		}
-		else {
-			btnStart.textContent = "Stop";
-			start = true;
-			animation = true;
-			btnStart.blur();
-			init();
-			var startTime = (new Date()).getTime();
-			animate(canvas, context, startTime);
-		}
-	}
-});
+	});

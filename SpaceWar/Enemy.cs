@@ -17,5 +17,8 @@ namespace SpaceWarService
 
 		[DataMember(Name = "s", Order = 2)]
 		public int S { get; set; }
+
+		[DataMember(Name = "dx", Order = 3)]
+		public int DX { get; set; }
 	}
 }

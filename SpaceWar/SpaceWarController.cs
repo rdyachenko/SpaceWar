@@ -17,18 +17,24 @@ namespace SpaceWarService
 		public HttpResponseMessage GetEnemyPosition()
 		{
 			var enemies = new List<Enemy>();
-			var distanceBeetwenEnemy = 30;
+			var distanceBeetwenEnemy = 1024 / 10;
+			var dx = 1;
 
-			for (int i = 0; i < 10; i++)
-				for (int j = 0; j < 5; j++)
+			for (int j = 0; j < 5; j++)
+			{
+				for (int i = 0; i < 10; i++)
 				{
+
 					enemies.Add(new Enemy
 					{
-						X = 70 + i * distanceBeetwenEnemy + distanceBeetwenEnemy / 3,
+						X = 70 + i * distanceBeetwenEnemy - distanceBeetwenEnemy / 3,
 						Y = 70 + j * 30,
-						S = 20
+						S = 20,
+						DX = dx
 					});
 				}
+				dx *= -1;
+			}
 
 			return Request.CreateResponse(HttpStatusCode.OK, enemies.ToArray(), "application/json");
 		}
