@@ -16,6 +16,9 @@
 				<button id="start" ng-click="startStopClick()">Start</button>
 			</td>
 			<td>
+				<button id="nextLevel" ng-click="nextLevelClick()">Next Level</button>
+			</td>
+			<td>
 				<label id="info" />
 			</td>
 		</tr>
@@ -27,24 +30,12 @@
 		</tr>
 		<tr>
 			<td>
-				<label>Enemy Col:</label>
-				<input id="enemyCol" type="number" value="10" />
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<label>Enemy Row:</label>
-				<input id="ememyRow" type="number" value="10" />
-			</td>
-		</tr>
-		<tr>
-			<td>
 				<label>Ship speed:</label>
 				<input id="shipSpeed" type="number" value="5"/>
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2">
+			<td colspan="3">
 				<canvas id="field" class="canvasField" width="1024" height="768" />
 			</td>
 		</tr>

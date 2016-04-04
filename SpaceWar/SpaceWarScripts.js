@@ -1,6 +1,4 @@
-﻿//window.addEventListener("load", init, true);
-
-var arrPiston = [];
+﻿var arrPiston = [];
 var arrEnemy = [];
 var arrKeyCodes = [];
 var ship;
@@ -43,12 +41,10 @@ function drawText(context, text, color, size) {
 	context.font = size + "px Arial";
 	context.fillStyle = color;
 	context.textAlign = "center";
-	context.fillText(text, resolution.x * dY / 2, resolution.y *dY/ 2);
+	context.fillText(text, canvas.width / 2 * dY, canvas.height / 2 * dY);
 }
 
 function init() {
-	var enemyCol = document.getElementById('enemyCol').value;
-	var enemyRow = document.getElementById('ememyRow').value;
 	var shipSpeed = document.getElementById('shipSpeed').value;
 
 	dX = canvas.width / (resolution.x + 1);
@@ -97,11 +93,13 @@ function render() {
 	if (arrEnemy.length == 0)
 		drawText(context, "Winner!", "blue", 50);
 
-	var shipPoint = { x: ship.x + ship.s / 2, y: ship.y };
-	if (enemyRect.y + enemyRect.h > shipPoint.y) {
-		drawText(context, "Fail!", "red", 50);
-		animation = false;
-		arrEnemy.splice(0, arrEnemy.length);
+	if (ship) {
+		var shipPoint = { x: ship.x + ship.s / 2, y: ship.y };
+		if (enemyRect.y + enemyRect.h > shipPoint.y) {
+			drawText(context, "Fail!", "red", 50);
+			animation = false;
+			arrEnemy.splice(0, arrEnemy.length);
+		}
 	}
 	
 	/*context.beginPath();
@@ -112,18 +110,20 @@ function render() {
 }
 
 window.onkeydown = function (e) {
-	var info = document.getElementById('info');
-	info.textContent = e.keyCode;
+	var exist = false;
+	for (var i = 0; i < arrKeyCodes.length; i++) {
+		if(arrKeyCodes[i] == e.keyCode){
+			exist = true;
+			break;
+		}
 
-	var exist = arrKeyCodes.find(function (a) { return a == e.keyCode });
-	if (!exist)
+	}
+	if (!exist) {
 		arrKeyCodes.push(e.keyCode);
+	}
 }
 
 window.onkeyup = function (e) {
-	var info = document.getElementById('info');
-	info.textContent = e.keyCode;
-
 	for (var i = 0; i < arrKeyCodes.length; i++) {
 		if (arrKeyCodes[i] == e.keyCode)
 			arrKeyCodes.splice(i,1);
@@ -135,12 +135,15 @@ var requestAnimationFrame = window.requestAnimationFrame ||
                             window.webkitRequestAnimationFrame || 
                             window.msRequestAnimationFrame;
 
-function animate(canvas, context, startTime) {
+var pifTime = 0;
+var scoreTime = 0;
+function animate(canvas, context, startTime, makeShot, showScore) {
 	// update
 	var curentTime = (new Date()).getTime();
 	var time = curentTime - startTime;
 
 	var linearSpeed = 500;
+	var reloadPistonTime = 20 * time / 1000;
 	// pixels / second
 	var speedY = linearSpeed * time / 1000;
 	
@@ -164,19 +167,27 @@ function animate(canvas, context, startTime) {
 	for (var i = 0; i < arrKeyCodes.length; i++) {
 		switch (arrKeyCodes[i]) {
 			case 32:
-				var piston = {
-					x: ship.x + ship.s / 2,
-					y: ship.y,
-				};
 
-				arrPiston.push(piston);
-				var piv = new Audio("./audio/piv.mp3");
-				piv.play();
+				if (curentTime - pifTime >= 200) {
+					pifTime = (new Date()).getTime();
+					var piston = {
+						x: ship.x + ship.s / 2,
+						y: ship.y,
+					};
 
-				for (var i = 0; i < arrKeyCodes.length; i++) {
-					if (arrKeyCodes[i] == 32)
-						arrKeyCodes.splice(i, 1);
+					makeShot(function () {
+						pifTime = (new Date()).getTime();
+
+						var piston = {
+							x: ship.x + ship.s / 2,
+							y: ship.y,
+						};
+						arrPiston.push(piston);
+						var piv = new Audio("./audio/piv.mp3");
+						piv.play();
+					});
 				}
+
 				break;
 			case 37://left
 				if (ship.x >= 0)
@@ -197,10 +208,15 @@ function animate(canvas, context, startTime) {
 		for (var i = 0; i < arrEnemy.length; i++) {
 			arrEnemy[i].y += speedY / 100 * speed;
 			arrEnemy[i].x += arrEnemy[i].dx;
-			if (arrEnemy[i].x < arrEnemy[i].minX || arrEnemy[i].x + arrEnemy[i].s > arrEnemy[i].maxX)
+			if (arrEnemy[i].x < arrEnemy[i].minX || arrEnemy[i].x + arrEnemy[i].s * 2 > arrEnemy[i].maxX)
 				arrEnemy[i].dx *= -1;
 		}
 		enemyRect.y += speedY / 100 * speed;
+	}
+
+	if (curentTime - scoreTime > 1000) {
+		scoreTime = curentTime;
+		showScore(DisplayScore);
 	}
 
 	calcEnemyRect();
@@ -210,9 +226,14 @@ function animate(canvas, context, startTime) {
 	if (animation) {
 		// request new frame
 		requestAnimationFrame(function () {
-			animate(canvas, context, curentTime);
+			animate(canvas, context, curentTime, makeShot, showScore);
 		});
 	}
+}
+
+function DisplayScore(score) {
+	var info = document.getElementById('info');
+	info.textContent = "ScoreCount: " + score.scoreCount + "; Level: " + score.level;
 }
 
 function InEnemy(piston, enemyOut) {
@@ -250,14 +271,14 @@ function calcEnemyRect() {
 			if (minY > enemy.y)
 				minY = enemy.y;
 			if (maxX < enemy.x)
-				maxX = enemy.x;
+				maxX = enemy.x + enemy.s;
 			if (maxY < enemy.y)
-				maxY = enemy.y;
+				maxY = enemy.y + enemy.s;
 		}
 		enemyRect.x = minX;
 		enemyRect.y = minY;
-		enemyRect.w = maxX - minX + arrEnemy[0].s;
-		enemyRect.h = maxY - minY + arrEnemy[0].s;
+		enemyRect.w = maxX - minX;
+		enemyRect.h = maxY - minY;
 	}
 }
 
@@ -273,11 +294,37 @@ app.controller('myCtrl', function ($scope, $http) {
 		$scope.startStopClick = function() {
 			var btnStart = document.getElementById('start');
 
+			if (start) {
+				btnStart.textContent = "Start";
+				start = false;
+				animation = false;
+			}
+			else {
+				btnStart.textContent = "Stop";
+				start = true;
+				animation = true;
+				btnStart.blur();
+				$http.post("/api/SpaceWar/StartGame", { someData: 16 });
+
+				var startTime = (new Date()).getTime();
+				animate(canvas, context, startTime, function (doShot) {
+						$http.post("/api/SpaceWar/Shot").success(function () {
+						doShot();
+					});
+				},
+					function (showScore) {
+						$http.get("/api/SpaceWar/Score").success(function (score) {
+							showScore(score);
+						});
+					});
+			}
+		}
+
+		$scope.nextLevelClick = function () {
 			$http.get("/api/SpaceWar/EnemyPosition")
 			.success(function (response) {
 
-				if (arrEnemy.length == 0)
-					arrEnemy = response.slice();
+				arrEnemy = response.slice();
 
 				calcEnemyRect();
 
@@ -287,22 +334,7 @@ app.controller('myCtrl', function ($scope, $http) {
 					enemy.minX = enemy.x - enemyRect.x;
 				}
 
-				if (start) {
-					btnStart.textContent = "Start";
-					start = false;
-					animation = false;
-					init();
-				}
-				else {
-					btnStart.textContent = "Stop";
-					start = true;
-					animation = true;
-					btnStart.blur();
-					init();
-					var startTime = (new Date()).getTime();
-					animate(canvas, context, startTime);
-				}
-			
+				init();
 			});
 		}
 	});

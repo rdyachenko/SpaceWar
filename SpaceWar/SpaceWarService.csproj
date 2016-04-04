@@ -89,7 +89,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseConrtoller.cs" />
-    <Compile Include="Enemy.cs" />
+    <Compile Include="DataMembers\Score.cs" />
+    <Compile Include="DataMembers\Enemy.cs" />
+    <Compile Include="DataMembers\StartGameData.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

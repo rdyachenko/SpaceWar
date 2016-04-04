@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Web;
 
-namespace SpaceWarService
+namespace SpaceWarService.DataMembers
 {
 	[DataContract(Name ="enemy")]
 	public class Enemy

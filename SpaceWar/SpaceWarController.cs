@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SpaceWarService.DataMembers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -11,6 +12,13 @@ namespace SpaceWarService
 {
 	public class SpaceWarController : BaseController
 	{
+		[ActionName("StartGame")]
+		[HttpPost]
+		public void StartGame(StartGameData data)
+		{
+			var routeData = Request;
+		}
+
 		[ActionName("EnemyPosition")]
 		[HttpGet]
 		[ResponseType(typeof(Enemy[]))]
@@ -38,5 +46,25 @@ namespace SpaceWarService
 
 			return Request.CreateResponse(HttpStatusCode.OK, enemies.ToArray(), "application/json");
 		}
+
+		[ActionName("Shot")]
+		[HttpPost]
+		public void Shot()
+		{
+		}
+
+		[ActionName("Score")]
+		[HttpGet]
+		[ResponseType(typeof(Score))]
+		public HttpResponseMessage GetScore()
+		{
+			return Request.CreateResponse(HttpStatusCode.OK, new Score()
+			{
+				ScoreCount = 13,
+				Level = 1
+			}, "application/json");
+		}
+
+		
 	}
 }
