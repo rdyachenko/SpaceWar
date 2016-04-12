@@ -4,11 +4,15 @@ var arrKeyCodes = [];
 var ship;
 var enemyRect = {};
 
+var arrPiv = [];
+var arrBang = [];
+
 var canvas;
 var context;
 
 var start = false;
 var animation = false;
+var enemiesSpeed = 5;
 
 var resolution = { x: 1024, y: 768 };
 
@@ -16,18 +20,25 @@ var dX = 1;
 var dY = 1;
 var dS = 1;
 
+var dYBack = 0;
+
+var responseForRetry;
+
+var shipPic = new Image();
+var enemyPic = new Image();
+var starsPic = new Image();
+
 function drawEnemy(context, enemy) {
-		context.beginPath();
-		context.rect(enemy.x * dX, enemy.y * dY, enemy.s * dS, enemy.s * dS);
-		context.closePath();
-		context.fill();
+	if (!enemyPic.src)
+		enemyPic.src = 'images/enemy.png';
+	context.drawImage(enemyPic, enemy.x * dX, enemy.y * dY, enemy.s * dS, enemy.s * dS);
 }
 
 function drawShip(context, ship) {
-		context.beginPath();
-		context.rect(ship.x * dX, ship.y * dY, ship.s * dS, ship.s * dS);
-		context.closePath();
-		context.fill();
+	if (!shipPic.src)
+		shipPic.src = 'images/ship.png';
+	context.drawImage(shipPic, ship.x * dX, ship.y * dY, ship.s * dS, ship.s * dS);
+	//context.fill();
 }
 
 function drawPiston(context, piston) {
@@ -41,30 +52,28 @@ function drawText(context, text, color, size) {
 	context.font = size + "px Arial";
 	context.fillStyle = color;
 	context.textAlign = "center";
-	context.fillText(text, canvas.width / 2 * dY, canvas.height / 2 * dY);
+	context.fillText(text, resolution.x / 2 * dY, resolution.y / 2 * dY);
 }
 
 function init() {
-	var shipSpeed = document.getElementById('shipSpeed').value;
-
 	dX = canvas.width / (resolution.x + 1);
 	dY = canvas.height / (resolution.y + 1);
 	dS = Math.min(dX, dY);
 	
 	enemyRect = { x: 0, y: 0, w: 0, h: 0 };
 
-	ship = {
-		x: resolution.x / 2,
-		y: resolution.y - 20,
-		s: 20,
-		speed: shipSpeed
-	}
+	arrPiston = [];
 
 	render();
 }
 
 function render() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.drawImage(starsPic, 0, dYBack - canvas.height, canvas.width, canvas.height);
+	context.drawImage(starsPic, 0, dYBack, canvas.width, canvas.height);
+
+	if (dYBack >= canvas.height)
+		dYBack = 0;
 
 	var color = '#0000FF'
 	context.strokeStyle = color;
@@ -137,7 +146,34 @@ var requestAnimationFrame = window.requestAnimationFrame ||
 
 var pifTime = 0;
 var scoreTime = 0;
-function animate(canvas, context, startTime, makeShot, showScore) {
+
+function PlayBang() {
+	var bang;
+	if (arrBang)
+		bang = arrBang.find(function (a) {
+			return a.ended;
+		})
+	if (!bang) {
+		bang = new Audio('audio/bang.mp3');
+		arrBang.push(bang);
+	}
+	bang.play();
+}
+
+function PlayPiv() {
+	var piv;
+	if (arrPiv)
+		piv = arrPiv.find(function (a) {
+			return a.ended;
+		})
+	if (!piv) {
+		piv = new Audio('audio/piv.mp3');
+		arrPiv.push(piv);
+	}
+	piv.play();
+}
+
+function animate(canvas, context, startTime, makeShot, enemyKilled, showScore) {
 	// update
 	var curentTime = (new Date()).getTime();
 	var time = curentTime - startTime;
@@ -154,10 +190,11 @@ function animate(canvas, context, startTime, makeShot, showScore) {
 
 			var enemy;
 			if (InEnemy(piston, function (e) { index = e; })) {
+				enemyKilled(function () { });
 				arrPiston.splice(i, 1);
 				arrEnemy.splice(index, 1);
-				var bang = new Audio("./audio/bang.mp3");
-				bang.play();
+
+				PlayBang();
 			}
 		}
 		else
@@ -168,7 +205,7 @@ function animate(canvas, context, startTime, makeShot, showScore) {
 		switch (arrKeyCodes[i]) {
 			case 32:
 
-				if (curentTime - pifTime >= 200) {
+				if (curentTime - pifTime >= ship.reloadTime) {
 					pifTime = (new Date()).getTime();
 					var piston = {
 						x: ship.x + ship.s / 2,
@@ -183,8 +220,7 @@ function animate(canvas, context, startTime, makeShot, showScore) {
 							y: ship.y,
 						};
 						arrPiston.push(piston);
-						var piv = new Audio("./audio/piv.mp3");
-						piv.play();
+						PlayPiv();
 					});
 				}
 
@@ -202,17 +238,17 @@ function animate(canvas, context, startTime, makeShot, showScore) {
 		}
 	}
 
-	var speed = document.getElementById('spinner').value;
-
 	if (arrEnemy.length > 0){
 		for (var i = 0; i < arrEnemy.length; i++) {
-			arrEnemy[i].y += speedY / 100 * speed;
+			arrEnemy[i].y += speedY / 100 * enemiesSpeed;
 			arrEnemy[i].x += arrEnemy[i].dx;
-			if (arrEnemy[i].x < arrEnemy[i].minX || arrEnemy[i].x + arrEnemy[i].s * 2 > arrEnemy[i].maxX)
+			if (arrEnemy[i].x <= arrEnemy[i].minX || arrEnemy[i].x + arrEnemy[i].s >= arrEnemy[i].maxX)
 				arrEnemy[i].dx *= -1;
 		}
-		enemyRect.y += speedY / 100 * speed;
+		enemyRect.y += speedY / 100 * enemiesSpeed;
 	}
+
+	dYBack += speedY * ship.speed / 10;
 
 	if (curentTime - scoreTime > 1000) {
 		scoreTime = curentTime;
@@ -226,7 +262,7 @@ function animate(canvas, context, startTime, makeShot, showScore) {
 	if (animation) {
 		// request new frame
 		requestAnimationFrame(function () {
-			animate(canvas, context, curentTime, makeShot, showScore);
+			animate(canvas, context, curentTime, makeShot, enemyKilled, showScore);
 		});
 	}
 }
@@ -271,26 +307,51 @@ function calcEnemyRect() {
 			if (minY > enemy.y)
 				minY = enemy.y;
 			if (maxX < enemy.x)
-				maxX = enemy.x + enemy.s;
+				maxX = enemy.x;
 			if (maxY < enemy.y)
-				maxY = enemy.y + enemy.s;
+				maxY = enemy.y;
 		}
 		enemyRect.x = minX;
 		enemyRect.y = minY;
-		enemyRect.w = maxX - minX;
-		enemyRect.h = maxY - minY;
+		enemyRect.w = maxX + arrEnemy[0].s - minX;
+		enemyRect.h = maxY + arrEnemy[0].s - minY;
 	}
+}
+
+window.addEventListener('load', load);
+window.addEventListener('resize', resize);
+
+function resize() {
+	var cc = document.getElementById("field");
+
+	var ddx = window.innerWidth / resolution.x;
+	var ddy = Math.min(window.innerHeight / resolution.y, ddx);
+
+	cc.width = resolution.x * ddx;
+	cc.height = resolution.y * ddy;
+
+	/*cc.style.width = window.innerWidth + "px";
+	cc.style.height = window.innerHeight + "px";*/
+}
+
+function load() {
+	canvas = document.getElementById('field');
+
+	/*if (window.innerWidth < resolution.x) {
+		var ddx = window.innerWidth / resolution.x;
+		var ddy = Math.min(window.innerHeight / resolution.y, ddx);
+
+		canvas.width = resolution.x * ddx;
+		canvas.height = resolution.y * ddy;
+	}*/
+
+	context = canvas.getContext('2d');
 }
 
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function ($scope, $http) {
 
-		canvas = document.getElementById('field');
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight - 200;
-
-		context = canvas.getContext('2d');
-
+	starsPic.src = 'images/stars.png';
 		$scope.startStopClick = function() {
 			var btnStart = document.getElementById('start');
 
@@ -312,29 +373,60 @@ app.controller('myCtrl', function ($scope, $http) {
 						doShot();
 					});
 				},
-					function (showScore) {
-						$http.get("/api/SpaceWar/Score").success(function (score) {
-							showScore(score);
-						});
+				function (enemyKilled) {
+					$http.post("/api/SpaceWar/EnemyKilled").success(function () {
+						enemyKilled();
 					});
+				},
+				function (showScore) {
+					$http.get("/api/SpaceWar/Score").success(function (score) {
+						showScore(score);
+					});
+				});
 			}
 		}
 
 		$scope.nextLevelClick = function () {
-			$http.get("/api/SpaceWar/EnemyPosition")
+			$http.get("/api/SpaceWar/Level")
 			.success(function (response) {
-
-				arrEnemy = response.slice();
-
-				calcEnemyRect();
-
-				for (var i = 0; i < arrEnemy.length; i++) {
-					var enemy = arrEnemy[i];
-					enemy.maxX = resolution.x - enemyRect.w + enemy.x;
-					enemy.minX = enemy.x - enemyRect.x;
-				}
-
-				init();
+				Level(response);
 			});
+			document.getElementById('nextLevel').blur();
 		}
-	});
+
+		$scope.retryClick = function () {
+			Level(responseForRetry);
+			document.getElementById('retry').blur();
+		}
+});
+
+function Level(response) {
+
+	responseForRetry = JSON.parse(JSON.stringify(response));
+	arrEnemy = response.enemies.enemies.slice();
+
+	calcEnemyRect();
+
+	for (var i = 0; i < arrEnemy.length; i++) {
+		var enemy = arrEnemy[i];
+		enemy.maxX = resolution.x - enemyRect.w - enemyRect.x + enemy.x + enemy.s;
+		enemy.minX = enemy.x - enemyRect.x;
+	}
+
+	ship = {
+		x: response.ship.x,
+		y: response.ship.y,
+		s: response.ship.s,
+		speed: response.ship.speed,
+		reloadTime: response.ship.reloadTime
+	}
+
+	enemiesSpeed = response.enemies.speed;
+
+	var info = document.getElementById('info2');
+	info.textContent = "Enemies Speed: " + enemiesSpeed +
+						"; Ship Speed: " + ship.speed +
+						"; Ship reload time: " + ship.reloadTime;
+
+	init();
+}

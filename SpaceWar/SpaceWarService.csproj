@@ -82,20 +82,28 @@
     <Content Include="audio\bang.mp3" />
     <Content Include="audio\piv.mp3" />
     <Content Include="Global.asax" />
+    <Content Include="images\enemy.png" />
+    <Content Include="images\ship.png" />
+    <Content Include="images\stars.png" />
     <Content Include="index.html" />
     <Content Include="SpaceWarScripts.js" />
     <Content Include="SpaceWarStyleSheet.css" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseConrtoller.cs" />
+    <Compile Include="DataMembers\EnemiesGroup.cs" />
+    <Compile Include="DataMembers\LevelConfiguration.cs" />
+    <Compile Include="DataMembers\Ship.cs" />
     <Compile Include="DataMembers\Score.cs" />
     <Compile Include="DataMembers\Enemy.cs" />
     <Compile Include="DataMembers\StartGameData.cs" />
+    <Compile Include="GameEngine.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="LevelEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScoreEngine.cs" />
     <Compile Include="SpaceWarController.cs" />
     <Compile Include="WebApiConfig.cs" />
   </ItemGroup>

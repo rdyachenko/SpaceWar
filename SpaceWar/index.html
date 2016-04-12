@@ -14,31 +14,23 @@
 		<tr>
 			<td>
 				<button id="start" ng-click="startStopClick()">Start</button>
-			</td>
-			<td>
 				<button id="nextLevel" ng-click="nextLevelClick()">Next Level</button>
+				<button id="retry" ng-click="retryClick()">Retry</button>
 			</td>
+		</tr>
+		<tr>
 			<td>
 				<label id="info" />
 			</td>
 		</tr>
 		<tr>
 			<td>
-				<label>Speed:</label>
-				<input id="spinner" type="number" value="5" />
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<label>Ship speed:</label>
-				<input id="shipSpeed" type="number" value="5"/>
-			</td>
-		</tr>
-		<tr>
-			<td colspan="3">
-				<canvas id="field" class="canvasField" width="1024" height="768" />
+				<label id="info2" />
 			</td>
 		</tr>
 	</table>
+	<div id="canvasContainer">
+		<canvas id="field" class="canvasField" width="1024" height="768"/>
+	</div>
 </body>
 </html>
