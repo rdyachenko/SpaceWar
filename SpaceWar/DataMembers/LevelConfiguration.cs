@@ -14,5 +14,8 @@ namespace SpaceWarService.DataMembers
 
 		[DataMember(Name = "ship", Order = 1)]
 		public Ship Ship { get; set; }
+
+		[DataMember(Name = "newGameRequired", Order = 2)]
+		public bool NewGameRequired { get; set; }
 	}
 }

@@ -19,32 +19,54 @@ namespace SpaceWarService
 		{
 			var key = HttpContext.Current.Session.SessionID;
 			if (games.ContainsKey(key))
-			{
 				gameEngine = games[key];
-			}
-			else
-			{
-				gameEngine = new GameEngine();
-				games.Add(key, gameEngine);
-			}
 		}
 
 		[ActionName("StartGame")]
 		[HttpPost]
 		public void StartGame(StartGameData data)
 		{
+			var key = HttpContext.Current.Session.SessionID;
+			gameEngine = new GameEngine();
 
+			if (games.ContainsKey(key))
+				games.Remove(key);
+
+			games.Add(key, gameEngine);
 		}
 
 		[ActionName("Level")]
 		[HttpGet]
 		[ResponseType(typeof(LevelConfiguration))]
-		public HttpResponseMessage GetEnemyPosition()
+		public HttpResponseMessage NewLevel()
+		{
+			var levelConfiguration = new LevelConfiguration();
+
+			if (!gameEngine.Level.IsMaxLevel)
+			{
+				levelConfiguration.Enemies = new EnemiesGroup();
+				levelConfiguration.Enemies.Enemies = gameEngine.Level.GetEnemiesForLevel(gameEngine.Level.CurrentLevel + 1);
+				levelConfiguration.Enemies.Speed = gameEngine.Level.EnemiesSpeed;
+
+				levelConfiguration.Ship = gameEngine.Level.GetShipProperties(gameEngine.Level.CurrentLevel);
+			}
+			else
+			{
+				levelConfiguration.NewGameRequired = true;
+			}
+
+			return Request.CreateResponse(HttpStatusCode.OK, levelConfiguration, "application/json");
+		}
+
+		[ActionName("Retry")]
+		[HttpGet]
+		[ResponseType(typeof(LevelConfiguration))]
+		public HttpResponseMessage Retry()
 		{
 			var levelConfiguration = new LevelConfiguration();
 
 			levelConfiguration.Enemies = new EnemiesGroup();
-			levelConfiguration.Enemies.Enemies = gameEngine.Level.GetEnemiesForLevel(gameEngine.Level.CurrentLevel + 1);
+			levelConfiguration.Enemies.Enemies = gameEngine.Level.GetEnemiesForLevel(gameEngine.Level.CurrentLevel);
 			levelConfiguration.Enemies.Speed = gameEngine.Level.EnemiesSpeed;
 
 			levelConfiguration.Ship = gameEngine.Level.GetShipProperties(gameEngine.Level.CurrentLevel);

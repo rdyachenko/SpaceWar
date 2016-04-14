@@ -12,6 +12,7 @@ var context;
 
 var start = false;
 var animation = false;
+var levelLoaded = false;
 var enemiesSpeed = 5;
 
 var resolution = { x: 1024, y: 768 };
@@ -21,8 +22,6 @@ var dY = 1;
 var dS = 1;
 
 var dYBack = 0;
-
-var responseForRetry;
 
 var shipPic = new Image();
 var enemyPic = new Image();
@@ -52,7 +51,7 @@ function drawText(context, text, color, size) {
 	context.font = size + "px Arial";
 	context.fillStyle = color;
 	context.textAlign = "center";
-	context.fillText(text, resolution.x / 2 * dY, resolution.y / 2 * dY);
+	context.fillText(text, resolution.x / 2 * dY, resolution.y / 4 * dY);
 }
 
 function init() {
@@ -99,15 +98,26 @@ function render() {
 			drawPiston(context, arrPiston[i]);
 	}
 
-	if (arrEnemy.length == 0)
-		drawText(context, "Winner!", "blue", 50);
+	if (arrEnemy.length == 0 && levelLoaded) {
+		var message = document.getElementById('message');
+		message.textContent = "Winner!";
+		message.setAttribute("style", "display: inline;");
+		message.setAttribute("class", "info infoWin");
+		document.getElementById('nextLevel').setAttribute("style", "display: inline");
+		levelLoaded = false;
+	}
 
 	if (ship) {
 		var shipPoint = { x: ship.x + ship.s / 2, y: ship.y };
-		if (enemyRect.y + enemyRect.h > shipPoint.y) {
-			drawText(context, "Fail!", "red", 50);
-			animation = false;
+		if (enemyRect.y + enemyRect.h > shipPoint.y && levelLoaded) {
+			var message = document.getElementById('message');
+			message.textContent = "Fail!";
+			message.setAttribute("style", "display: inline;");
+			message.setAttribute("class", "info infoFail");
+
 			arrEnemy.splice(0, arrEnemy.length);
+			document.getElementById('retry').setAttribute("style", "display: inline");
+			levelLoaded = false;
 		}
 	}
 	
@@ -116,6 +126,13 @@ function render() {
 	context.closePath();*/
 
 	context.stroke();
+}
+
+function HideAllControls() {
+	document.getElementById('nextLevel').setAttribute("style", "display: none");
+	document.getElementById('retry').setAttribute("style", "display: none");
+	document.getElementById('start').setAttribute("style", "display: none");
+	document.getElementById('message').setAttribute("style", "display: none");
 }
 
 window.onkeydown = function (e) {
@@ -248,7 +265,8 @@ function animate(canvas, context, startTime, makeShot, enemyKilled, showScore) {
 		enemyRect.y += speedY / 100 * enemiesSpeed;
 	}
 
-	dYBack += speedY * ship.speed / 10;
+	if (ship)
+		dYBack += speedY * ship.speed / 10;
 
 	if (curentTime - scoreTime > 1000) {
 		scoreTime = curentTime;
@@ -319,57 +337,32 @@ function calcEnemyRect() {
 }
 
 window.addEventListener('load', load);
-window.addEventListener('resize', resize);
-
-function resize() {
-	var cc = document.getElementById("field");
-
-	var ddx = window.innerWidth / resolution.x;
-	var ddy = Math.min(window.innerHeight / resolution.y, ddx);
-
-	cc.width = resolution.x * ddx;
-	cc.height = resolution.y * ddy;
-
-	/*cc.style.width = window.innerWidth + "px";
-	cc.style.height = window.innerHeight + "px";*/
-}
 
 function load() {
 	canvas = document.getElementById('field');
-
-	/*if (window.innerWidth < resolution.x) {
-		var ddx = window.innerWidth / resolution.x;
-		var ddy = Math.min(window.innerHeight / resolution.y, ddx);
-
-		canvas.width = resolution.x * ddx;
-		canvas.height = resolution.y * ddy;
-	}*/
-
 	context = canvas.getContext('2d');
+	starsPic.src = 'images/stars.png';
 }
 
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function ($scope, $http) {
 
-	starsPic.src = 'images/stars.png';
 		$scope.startStopClick = function() {
 			var btnStart = document.getElementById('start');
+			
+			start = true;
+			animation = true;
+			$http.post("/api/SpaceWar/StartGame", { someData: 16 }).success(function () {
 
-			if (start) {
-				btnStart.textContent = "Start";
-				start = false;
-				animation = false;
-			}
-			else {
-				btnStart.textContent = "Stop";
-				start = true;
-				animation = true;
-				btnStart.blur();
-				$http.post("/api/SpaceWar/StartGame", { someData: 16 });
+				$http.get("/api/SpaceWar/Level")
+					.success(function (response) {
+						Level(response);
+						HideAllControls();
+					});
 
 				var startTime = (new Date()).getTime();
 				animate(canvas, context, startTime, function (doShot) {
-						$http.post("/api/SpaceWar/Shot").success(function () {
+					$http.post("/api/SpaceWar/Shot").success(function () {
 						doShot();
 					});
 				},
@@ -383,50 +376,69 @@ app.controller('myCtrl', function ($scope, $http) {
 						showScore(score);
 					});
 				});
-			}
+				HideAllControls();
+			});
 		}
 
 		$scope.nextLevelClick = function () {
 			$http.get("/api/SpaceWar/Level")
 			.success(function (response) {
+				HideAllControls();
 				Level(response);
 			});
-			document.getElementById('nextLevel').blur();
 		}
 
 		$scope.retryClick = function () {
-			Level(responseForRetry);
-			document.getElementById('retry').blur();
+			$http.get("/api/SpaceWar/Retry")
+			.success(function (responseForRetry) {
+				HideAllControls();
+				Level(responseForRetry);
+			});
 		}
 });
 
 function Level(response) {
 
-	responseForRetry = JSON.parse(JSON.stringify(response));
-	arrEnemy = response.enemies.enemies.slice();
+	if (!response.newGameRequired) {
+		arrEnemy = response.enemies.enemies.slice();
 
-	calcEnemyRect();
+		calcEnemyRect();
 
-	for (var i = 0; i < arrEnemy.length; i++) {
-		var enemy = arrEnemy[i];
-		enemy.maxX = resolution.x - enemyRect.w - enemyRect.x + enemy.x + enemy.s;
-		enemy.minX = enemy.x - enemyRect.x;
+		for (var i = 0; i < arrEnemy.length; i++) {
+			var enemy = arrEnemy[i];
+			enemy.maxX = resolution.x - enemyRect.w - enemyRect.x + enemy.x + enemy.s;
+			enemy.minX = enemy.x - enemyRect.x;
+		}
+
+		ship = {
+			x: response.ship.x,
+			y: response.ship.y,
+			s: response.ship.s,
+			speed: response.ship.speed,
+			reloadTime: response.ship.reloadTime
+		}
+
+		enemiesSpeed = response.enemies.speed;
+
+		var info = document.getElementById('info2');
+		info.textContent = "Enemies Speed: " + enemiesSpeed +
+							"; Ship Speed: " + ship.speed +
+							"; Ship reload time: " + ship.reloadTime;
+
+		init();
+
+		levelLoaded = true;
 	}
-
-	ship = {
-		x: response.ship.x,
-		y: response.ship.y,
-		s: response.ship.s,
-		speed: response.ship.speed,
-		reloadTime: response.ship.reloadTime
+	else
+	{
+		HideAllControls();
+		document.getElementById('start').setAttribute("style", "display: inline");
+		var message = document.getElementById('message');
+		message.setAttribute("style", "display: inline;");
+		message.setAttribute("class", "info infoCong");
+		message.textContent = "Congratulation! You are pass the game. Press Start for new game.";
+		start = false;
+		animation = false;
+		levelLoaded = false;
 	}
-
-	enemiesSpeed = response.enemies.speed;
-
-	var info = document.getElementById('info2');
-	info.textContent = "Enemies Speed: " + enemiesSpeed +
-						"; Ship Speed: " + ship.speed +
-						"; Ship reload time: " + ship.reloadTime;
-
-	init();
 }
